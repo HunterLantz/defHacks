@@ -222,10 +222,6 @@ crossorigin="anonymous">
       });
     });
 
-    $('#searchbutton').on('click',function(e) {
-
-    }
-
     $('#get-balance-btn').on('click', function(e) {
       $.get('/balance', function(data) {
         $('#get-balance-data').slideUp(function() {
