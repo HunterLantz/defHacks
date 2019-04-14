@@ -4,10 +4,16 @@ import datetime
 import plaid
 import json
 import time
+import pymysql
+import pyodbc
 from flask import Flask
 from flask import render_template
 from flask import request
 from flask import jsonify
+
+conn = pyodbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=./transactions.accdb;')
+cursor = conn.cursor()
+
 
 app = Flask(__name__)
 
@@ -28,6 +34,8 @@ PLAID_PRODUCTS = 'transactions'
 
 client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                       public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2018-05-22')
+
+
 
 @app.route('/')
 def index():
@@ -113,9 +121,19 @@ def get_transactions():
     data = trans['account_id']+": "+str(trans['amount'])
     dic = {"id":trans['name'], "value":str(trans['amount'])}
     store.append(dic)
-    print(data)
+    
+   
+    for row in cursor.execute('SELECT findata.tID from findata'):
+        print(row)
+    if trans['amount']>30:
+          cursor.execute('''
+                    INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, '3', ?, ?,'0')
+                  ''',(transactions_response['accounts'][0]['account_id'],trans['transaction_id'],trans['account_id']))
+
   global transactions
   transactions = store
+  conn.commit();
+  
   return jsonify({'error': None, 'transactions': transactions_response})
 
 # Retrieve Identity data for an Item
