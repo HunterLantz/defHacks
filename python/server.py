@@ -32,7 +32,7 @@ client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
 @app.route('/')
 def index():
   return render_template(
-    'index.ejs',
+    'index.html',
     plaid_public_key=PLAID_PUBLIC_KEY,
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
@@ -41,7 +41,7 @@ def index():
 @app.route('/home')
 def home():
   return render_template(
-    'home.ejs',
+    'home.html',
     plaid_public_key=PLAID_PUBLIC_KEY,
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
@@ -50,7 +50,7 @@ def home():
 @app.route('/account')
 def account():
   return render_template(
-    'account.ejs',
+    'account.html',
     plaid_public_key=PLAID_PUBLIC_KEY,
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
