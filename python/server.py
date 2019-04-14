@@ -79,6 +79,9 @@ def get_transactions():
   except plaid.errors.PlaidError as e:
     return jsonify(format_error(e))
   pretty_print_response(transactions_response)
+  for trans in transactions_response['transactions']:
+    data = trans['account_id']+": "+str(trans['amount'])
+    print(data)
   return jsonify({'error': None, 'transactions': transactions_response})
 
 # Retrieve Identity data for an Item
@@ -103,17 +106,6 @@ def get_accounts():
   pretty_print_response(accounts_response)
   return jsonify({'error': None, 'accounts': accounts_response})
 
-
-# Retrieve high-level information about an Item
-# https://plaid.com/docs/#retrieve-item
-@app.route('/item', methods=['GET'])
-def item():
-  global access_token
-  item_response = client.Item.get(access_token)
-  institution_response = client.Institutions.get_by_id(item_response['item']['institution_id'])
-  pretty_print_response(item_response)
-  pretty_print_response(institution_response)
-  return jsonify({'error': None, 'item': item_response['item'], 'institution': institution_response['institution']})
 
 @app.route('/set_access_token', methods=['POST'])
 def set_access_token():
