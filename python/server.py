@@ -38,6 +38,23 @@ def index():
     plaid_products=PLAID_PRODUCTS,
   )
 
+@app.route('/home')
+def home():
+  return render_template(
+    'home.ejs',
+    plaid_public_key=PLAID_PUBLIC_KEY,
+    plaid_environment=PLAID_ENV,
+    plaid_products=PLAID_PRODUCTS,
+  )
+
+@app.route('/account')
+def account():
+  return render_template(
+    'account.ejs',
+    plaid_public_key=PLAID_PUBLIC_KEY,
+    plaid_environment=PLAID_ENV,
+    plaid_products=PLAID_PRODUCTS,
+  )
 access_token = None
 
 # Exchange token flow - exchange a Link public_token for
