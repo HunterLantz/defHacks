@@ -58,9 +58,35 @@
 
         </table>
     </div>
+    {% endif %}
+    {% if rating %}
     
-        
-        
+    <section id="gallery">
+        <div class="container">
+            <div class="row">
+                {% for ratable in ratings %}
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ratable.aID}}</h5>
+                            <p class="card-text">
+                                current rating: {{ratable.rating}}
+                                rates left: {{ratable.ratings}}
+                            </p>
+                            <form action="submit" method="post">
+                                <input type="text" name="relation" value="{{ratable.aID}}" style="opacity:0" />
+                                <input type="number" name="rating" min="1" max="5">
+                                <input type="submit" name="submit" class="btn btn-success" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    
     {% endif %}
 
 
