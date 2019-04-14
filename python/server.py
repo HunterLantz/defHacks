@@ -6,6 +6,7 @@ import json
 import time
 import pymysql
 import pyodbc
+import random
 from flask import Flask
 from flask import render_template
 from flask import request
@@ -36,7 +37,23 @@ client = plaid.Client(client_id = PLAID_CLIENT_ID, secret=PLAID_SECRET,
                       public_key=PLAID_PUBLIC_KEY, environment=PLAID_ENV, api_version='2018-05-22')
 
 
+def flipflop(aID, uID, tID):
+    newuID = checkdupes(aID)
+    if newuID != None:
+        temp= float(random.randint(1,5))
+        cursor.execute('''
+                        INSERT INTO findata (uID,score,tID,aID,tstat) VALUES(?, ?, ?, ?, '0')
+                        ''', (newuID,temp,tID,uID))
+        conn.commit();
+    return
 
+def checkdupes(checkID):
+    for row in cursor.execute('SELECT findata.uID from findata'):
+        compareID = row.uID
+        if compareID == checkID:
+            return None
+        else:
+            return checkID
 
 @app.route('/')
 def index():
@@ -46,6 +63,7 @@ def index():
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
   )
+
 
 @app.route('/home')
 def home():
@@ -59,28 +77,33 @@ def home():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     list = []
-    adder = request.form['rating']
-    if request.form['rating'] == 1:
+    print("in submit")
+    adder = int(request.form['rating'])
+    if adder == 1:
         adder = -5
-    if request.form['rating']==2;
+    if adder==2:
         adder=-4
-    if request.form['rating']==3:
+    if adder==3:
         adder=0
+    print("first requests")
+    i=0
     for row in cursor.execute("SELECT * FROM findata WHERE uID LIKE ?",(request.form['relation'])):
-        temp = ('uID':row.uID, 'score':row.score+adder, 'tID':row.tID, 'aID';row.aID, 'tstat':row.tstat)
+        temp = (row.uID,int(row.score)+adder, row.tID, row.aID, row.tstat)
+        list.append(temp)
     cursor.execute("DELETE FROM findata WHERE uID LIKE ?",(request.form['relation']))
-    for tup in temp:
+    while i <len(list)-1:
         cursor.execute('''
-                    INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, ?, ?, ?,?)
-                  ''',(temp['uID'],temp['score'],temp['tID'],temp['aID'], temp['tstat']))
+                    INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, ?, ?, ?,'0')
+                  ''',(list[i][0],float(list[i][1]),list[i][2],list[i][3]))
+        i+=1
     conn.commit();
     dic = []
-    for row in cursor.execute("SELECT findata.score, findata.aID FROM findata WHERE tstat LIKE '%0%'"):
-        if not any(d['aID'] == row.aID for d in dic):
-            dic.append({'aID':row.aID, 'rating':row.score, 'ratings':1})
+    for row in cursor.execute("SELECT findata.score, findata.uID FROM findata WHERE tstat LIKE '%0%'"):
+        if not any(d['uID'] == row.uID for d in dic) and row.uID != user:
+            dic.append({'uID':row.uID, 'rating':row.score, 'ratings':1})
         else:
             for thing in dic:
-                if thing['aID'] == row.aID:
+                if thing['uID'] == row.uID:
                     thing['ratings']+=1
     return render_template(
     'account.html',
@@ -95,12 +118,12 @@ def submit():
 @app.route('/account')
 def account():
     dic = []
-    for row in cursor.execute("SELECT findata.score, findata.aID FROM findata WHERE tstat LIKE '%0%'"):
-        if not any(d['aID'] == row.aID for d in dic):
-            dic.append({'aID':row.aID, 'rating':row.score, 'ratings':1})
+    for row in cursor.execute("SELECT findata.score, findata.uID FROM findata WHERE tstat LIKE '%0%'"):
+        if not any(d['uID'] == row.uID for d in dic) and row.uID != user:
+            dic.append({'uID':row.uID, 'rating':row.score, 'ratings':1})
         else:
             for thing in dic:
-                if thing['aID'] == row.aID:
+                if thing['uID'] == row.uID:
                     thing['ratings']+=1
     return render_template(
     'account.html',
@@ -112,20 +135,9 @@ def account():
     ratings=dic,
   )
 
-@app.route('/mytrans')
-def mytrans():
-    
-    return render_template(
-    'account.html',
-    plaid_public_key=PLAID_PUBLIC_KEY,
-    plaid_environment=PLAID_ENV,
-    plaid_products=PLAID_PRODUCTS,
-    mytrans=True,
-    transactions=transactions,
-    
-  )
 access_token = None
 transactions = None
+user = None
 # Exchange token flow - exchange a Link public_token for
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
@@ -173,14 +185,17 @@ def get_transactions():
     
     if trans['amount']>30:
           cursor.execute('''
-                    INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, '3', ?, ?,'0')
+                    INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, 3, ?, ?,'0')
                   ''',(transactions_response['accounts'][0]['account_id'],trans['transaction_id'],trans['account_id']))
-
+          t = flipflop(trans['account_id'],transactions_response['accounts'][0]['account_id'],trans['transaction_id'] )
+  global user
+  use= transactions_response['accounts'][0]['account_id']
   global transactions
   transactions = store
   conn.commit();
   
   return jsonify({'error': None, 'transactions': transactions_response})
+
 
 # Retrieve Identity data for an Item
 # https://plaid.com/docs/#identity
@@ -220,3 +235,4 @@ def format_error(e):
 
 if __name__ == '__main__':
     app.run(port=os.getenv('PORT', 5000))
+

@@ -28,8 +28,6 @@
         <div class="collapse navbar-collapse">
             <div class="navbar-nav">
                 <button id="get-transactions-btn" class="btn btn-secondary"><i class="fas fa-redo">   Refresh</i></button>
-                <a style="color:white" class="nav-item nav-link" href="#">Account</a>
-                <a style="color:white" class="nav-item nav-link" href="http://localhost:5000/mytrans">My Transactions</a>
                 <form>
                     <input type="text" name="search" value="search" />
                     <input type="submit" class="btn btn-success " value="Submit">
@@ -38,27 +36,6 @@
             </div>
         </div>
     </nav>
-    {% if mytrans %}
-    <div class="container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Transaction Recipient</th>
-                    <th scope="col">$ Given</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in transactions %}
-                <tr>
-                    <td>{{item.id}}</td>
-                    <td>{{item.value}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-
-        </table>
-    </div>
-    {% endif %}
     {% if rating %}
     
     <section id="gallery">
@@ -68,13 +45,13 @@
                 <div class="col-lg-4 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">{{ratable.aID}}</h5>
+                            <h5 class="card-title">{{ratable.uID}}</h5>
                             <p class="card-text">
                                 current rating: {{ratable.rating}}
                                 rates left: {{ratable.ratings}}
                             </p>
                             <form action="submit" method="post">
-                                <input type="text" name="relation" value="{{ratable.aID}}" style="opacity:0" />
+                                <input type="text" name="relation" value="{{ratable.uID}}" style="opacity:0" />
                                 <input type="number" name="rating" min="1" max="5">
                                 <input type="submit" name="submit" class="btn btn-success" />
                             </form>
@@ -294,7 +271,8 @@
             });
           });
         }
-      });
+        });
+        window.location.href = "http://localhost:5000/account";
     });
 
     $('#get-balance-btn').on('click', function(e) {
