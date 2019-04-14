@@ -10,15 +10,6 @@ from flask import render_template
 from flask import request
 from flask import jsonify
 
-
-def flipflop(aID, uID, tID, value):
-    newaID = checkdupes(aID)
-    if newaID != null:
-        cursor.execute('''
-                        INSERT INTO findata (uID,score,tID,aID,tstat) VALUES(?, ?, ?, ?, ?))
-                        ''', (newaID,random.randint(1,6),tID,newuID,random.randint(0,2)))
-    
-
 def checkdupes(checkID):
     transactions_response = client.Transactions.get(access_token, start_date, end_date)
     except plaid.errors.PlaidError as e:
