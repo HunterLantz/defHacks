@@ -54,9 +54,21 @@ def account():
     plaid_public_key=PLAID_PUBLIC_KEY,
     plaid_environment=PLAID_ENV,
     plaid_products=PLAID_PRODUCTS,
+    mytrans=False,
+  )
+
+@app.route('/mytrans')
+def mytrans():
+  return render_template(
+    'account.html',
+    plaid_public_key=PLAID_PUBLIC_KEY,
+    plaid_environment=PLAID_ENV,
+    plaid_products=PLAID_PRODUCTS,
+    mytrans=True,
+    transactions=transactions,
   )
 access_token = None
-
+transactions = None
 # Exchange token flow - exchange a Link public_token for
 # an API access_token
 # https://plaid.com/docs/#exchange-token-flow
@@ -96,9 +108,14 @@ def get_transactions():
   except plaid.errors.PlaidError as e:
     return jsonify(format_error(e))
   pretty_print_response(transactions_response)
+  store = []
   for trans in transactions_response['transactions']:
     data = trans['account_id']+": "+str(trans['amount'])
+    dic = {"id":trans['name'], "value":str(trans['amount'])}
+    store.append(dic)
     print(data)
+  global transactions
+  transactions = store
   return jsonify({'error': None, 'transactions': transactions_response})
 
 # Retrieve Identity data for an Item
