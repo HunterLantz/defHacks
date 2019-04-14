@@ -186,8 +186,8 @@ def get_transactions():
     if trans['amount']>30:
           cursor.execute('''
                     INSERT INTO findata (uID,score,tID,aID,tstat) VALUES( ?, 3, ?, ?,'0')
-                  ''',(transactions_response['accounts'][0]['account_id'],trans['transaction_id'],trans['account_id']))
-          t = flipflop(trans['account_id'],transactions_response['accounts'][0]['account_id'],trans['transaction_id'] )
+                  ''',(transactions_response['accounts'][0]['account_id'],trans['transaction_id'],trans['name']))
+          t = flipflop(trans['name'],transactions_response['accounts'][0]['account_id'],trans['transaction_id'] )
   global user
   use= transactions_response['accounts'][0]['account_id']
   global transactions
